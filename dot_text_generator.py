@@ -47,7 +47,7 @@ class DotTextGenerator:
         # Text input
         ttk.Label(self.settings_frame, text="Text to Convert:").grid(row=0, column=0, sticky="w", pady=(0, 5))
         self.text_input = scrolledtext.ScrolledText(self.settings_frame, height=4, width=30)
-        self.text_input.insert("1.0", "Hello\nWorld!")
+        self.text_input.insert("1.0", "Hello\nWorld!\nこんにちは\n世界!")
         
         # Font size
         ttk.Label(self.settings_frame, text="Font Size:").grid(row=2, column=0, sticky="w", pady=(10, 5))
@@ -200,14 +200,31 @@ class DotTextGenerator:
             temp_img = Image.new('RGB', (800, 600), 'white')
             draw = ImageDraw.Draw(temp_img)
             
-            # Try to use a default font, fallback to built-in if not available
-            try:
-                font = ImageFont.truetype("arial.ttf", font_size)
-            except (OSError, IOError):
+            # Try to use fonts with Japanese support, fallback to built-in if not available
+            font_paths = [
+                # Japanese fonts
+                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+                "/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf",
+                "/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf",
+                "/System/Library/Fonts/ヒラギノ角ゴ ProN W3.otf",
+                "/System/Library/Fonts/AppleGothic.ttf",
+                "C:/Windows/Fonts/meiryo.ttc",
+                "C:/Windows/Fonts/msgothic.ttc",
+                # Fallback to standard fonts
+                "arial.ttf",
+                "/System/Library/Fonts/Arial.ttf",
+            ]
+            
+            font = None
+            for font_path in font_paths:
                 try:
-                    font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", font_size)
+                    font = ImageFont.truetype(font_path, font_size)
+                    break
                 except (OSError, IOError):
-                    font = ImageFont.load_default()
+                    continue
+            
+            if font is None:
+                font = ImageFont.load_default()
             
             # Draw text
             draw.text((10, 10), text, fill='black', font=font)
@@ -318,7 +335,7 @@ class DotTextGenerator:
     def reset_settings(self):
         """Reset all settings to default values."""
         self.text_input.delete("1.0", "end")
-        self.text_input.insert("1.0", "Hello\nWorld!")
+        self.text_input.insert("1.0", "Hello\nWorld!\nこんにちは\n世界!")
         
         self.font_size_var.set(24)
         self.font_size_label.config(text="24")
